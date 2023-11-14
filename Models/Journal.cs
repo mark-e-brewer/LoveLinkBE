@@ -6,7 +6,7 @@
         required
         public int? UserId { get; set; }
         public int? PartnerId { get; set; }
-        public int? PartnerUid { get; set; }
+        public string? PartnerUid { get; set; }
         public string? Name { get; set; }
         public string? Entry { get; set; }
         public DateTime? DateEntered { get; set; }
