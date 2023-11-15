@@ -1,4 +1,6 @@
-﻿namespace LoveLink.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace LoveLink.Models
 {
     public class Notification
     {
@@ -13,6 +15,7 @@
         public bool? Viewed { get; set; }
         public string? LinkToSource { get; set; }
         public User? SourceUser { get; set; }
+        [ForeignKey("ReceivingUserId")]  // Add this attribute
         public User? ReceivingUser { get; set; }
     }
 }
