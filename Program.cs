@@ -62,6 +62,67 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+//GET All Users
+app.MapGet("/users", (LoveLinkDbContext db) =>
+{
+    return db.Users.ToList();
+});
+//GET User by Id
+app.MapGet("/user/{id}", (LoveLinkDbContext db, int id) =>
+{
+    var user = db.Users.Where(u => u.Id == id);
+    return user;
+});
+
+app.MapPost("/newUser", (LoveLinkDbContext db, User user) =>
+{
+    db.Users.Add(user);
+    db.SaveChanges();
+    return Results.Created($"/newUser/{user.Id}", user);
+
+});
+
+app.MapDelete("/user/{id}", (LoveLinkDbContext db, int id) =>
+{
+
+    var userToDelete = db.Users.Where(u => u.Id == id).FirstOrDefault();
+
+    if (userToDelete == null)
+    {
+        return Results.NotFound("User not found");
+    }
+
+    db.Users.Remove(userToDelete);
+    db.SaveChanges();
+    return Results.Ok(userToDelete);
+});
+
+app.MapPut("/user/{id}", (LoveLinkDbContext db, int id, User updatedUser) =>
+{
+    var existingUser = db.Users.Where(u => u.Id == id).FirstOrDefault();
+
+    if (existingUser == null)
+    {
+        return Results.NotFound("User not found");
+    }
+
+    existingUser.UID = updatedUser.UID;
+    existingUser.Name = updatedUser.Name;
+    existingUser.Age = updatedUser.Age;
+    existingUser.Bio = updatedUser.Bio;
+    existingUser.Gender = updatedUser.Gender;
+    existingUser.ProfilePhoto = updatedUser.ProfilePhoto;
+    existingUser.PartnerId = updatedUser.PartnerId;
+    existingUser.PartnerUid = updatedUser.PartnerUid;
+    existingUser.AnniversaryDate = updatedUser.AnniversaryDate;
+    existingUser.PartnerCode = updatedUser.PartnerCode;
+
+
+    db.SaveChanges();
+
+    return Results.Ok(existingUser);
+});
+
 
 //USER ENDPOINTS
 
