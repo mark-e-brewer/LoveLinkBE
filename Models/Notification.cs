@@ -4,7 +4,8 @@ namespace LoveLink.Models
 {
     public class Notification
     {
-        public int? Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
         required
         public int? SourceUserId { get; set; }
         public string? SourceUserName { get; set; }

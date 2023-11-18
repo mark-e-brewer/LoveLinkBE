@@ -1,8 +1,11 @@
-﻿namespace LoveLink.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace LoveLink.Models
 {
     public class User
     {
-        public int? Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
         required
         public string? UID { get; set; }
         public string? Name { get; set; }

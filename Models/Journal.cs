@@ -1,8 +1,11 @@
-﻿namespace LoveLink.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace LoveLink.Models
 {
     public class Journal
     {
-        public int? Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
         required
         public int? UserId { get; set; }
         public int? PartnerId { get; set; }
