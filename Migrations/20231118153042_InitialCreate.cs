@@ -135,24 +135,38 @@ namespace LoveLink.Migrations
                 name: "JournalMoodTag",
                 columns: table => new
                 {
-                    JournalsId = table.Column<int>(type: "integer", nullable: false),
-                    MoodTagsId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    JournalId = table.Column<int>(type: "integer", nullable: false),
+                    MoodTagId = table.Column<int>(type: "integer", nullable: false),
+                    MoodTagId1 = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_JournalMoodTag", x => new { x.JournalsId, x.MoodTagsId });
+                    table.PrimaryKey("PK_JournalMoodTag", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_JournalMoodTag_Journals_JournalsId",
-                        column: x => x.JournalsId,
+                        name: "FK_JournalMoodTag_Journals_JournalId",
+                        column: x => x.JournalId,
                         principalTable: "Journals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_JournalMoodTag_MoodTags_MoodTagsId",
-                        column: x => x.MoodTagsId,
+                        name: "FK_JournalMoodTag_Journals_MoodTagId",
+                        column: x => x.MoodTagId,
+                        principalTable: "Journals",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_JournalMoodTag_MoodTags_MoodTagId",
+                        column: x => x.MoodTagId,
                         principalTable: "MoodTags",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_JournalMoodTag_MoodTags_MoodTagId1",
+                        column: x => x.MoodTagId1,
+                        principalTable: "MoodTags",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.InsertData(
@@ -180,8 +194,8 @@ namespace LoveLink.Migrations
                 columns: new[] { "Id", "DateEntered", "Entry", "Name", "PartnerId", "PartnerUid", "UserId", "Visibility" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 11, 13, 22, 8, 54, 882, DateTimeKind.Local).AddTicks(9525), "This is the first entry.", "Mark's first Journal Entry", 2, "efg789hij0", 1, "Public" },
-                    { 2, new DateTime(2023, 11, 13, 22, 8, 54, 882, DateTimeKind.Local).AddTicks(9563), "This is Alex's entry.", "Alex's first Journal Entry", 1, "123abc456d", 2, "Private" }
+                    { 1, new DateTime(2023, 11, 18, 9, 30, 42, 653, DateTimeKind.Local).AddTicks(1332), "This is the first entry.", "Mark's first Journal Entry", 2, "efg789hij0", 1, "Public" },
+                    { 2, new DateTime(2023, 11, 18, 9, 30, 42, 653, DateTimeKind.Local).AddTicks(1391), "This is Alex's entry.", "Alex's first Journal Entry", 1, "123abc456d", 2, "Private" }
                 });
 
             migrationBuilder.InsertData(
@@ -189,8 +203,8 @@ namespace LoveLink.Migrations
                 columns: new[] { "Id", "DateTimeSet", "Mood", "Notes", "PartnerId", "PartnerUid", "UserId", "UserName" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 11, 13, 22, 8, 54, 882, DateTimeKind.Local).AddTicks(9588), "Happy", "Feeling great today!", 2, "efg789hij0", 1, "Mark" },
-                    { 2, new DateTime(2023, 11, 13, 22, 8, 54, 882, DateTimeKind.Local).AddTicks(9592), "Calm", "Taking it easy.", 1, "123abc456d", 2, "Alex" }
+                    { 1, new DateTime(2023, 11, 18, 9, 30, 42, 654, DateTimeKind.Local).AddTicks(3014), "Happy", "Feeling great today!", 2, "efg789hij0", 1, "Mark" },
+                    { 2, new DateTime(2023, 11, 18, 9, 30, 42, 654, DateTimeKind.Local).AddTicks(3035), "Calm", "Taking it easy.", 1, "123abc456d", 2, "Alex" }
                 });
 
             migrationBuilder.InsertData(
@@ -198,14 +212,34 @@ namespace LoveLink.Migrations
                 columns: new[] { "Id", "DateSet", "LinkToSource", "ReceivingUserId", "ReceivingUserName", "SourceUserId", "SourceUserName", "Title", "Viewed" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 11, 13, 22, 8, 54, 883, DateTimeKind.Local).AddTicks(7330), "https://example.com/message", 2, "Alex", 1, "Mark", "Mark posted a journal entry", false },
-                    { 2, new DateTime(2023, 11, 13, 22, 8, 54, 883, DateTimeKind.Local).AddTicks(7351), "https://example.com/friend-request", 1, "Mark", 2, "Alex", "Alex set Their Mood To 'Happy'", false }
+                    { 1, new DateTime(2023, 11, 18, 9, 30, 42, 655, DateTimeKind.Local).AddTicks(184), "https://example.com/message", 2, "Alex", 1, "Mark", "Mark posted a journal entry", false },
+                    { 2, new DateTime(2023, 11, 18, 9, 30, 42, 655, DateTimeKind.Local).AddTicks(201), "https://example.com/friend-request", 1, "Mark", 2, "Alex", "Alex set Their Mood To 'Happy'", false }
+                });
+
+            migrationBuilder.InsertData(
+                table: "JournalMoodTag",
+                columns: new[] { "Id", "JournalId", "MoodTagId", "MoodTagId1" },
+                values: new object[,]
+                {
+                    { 1, 1, 1, null },
+                    { 3, 1, 1, null },
+                    { 4, 2, 2, null }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_JournalMoodTag_MoodTagsId",
+                name: "IX_JournalMoodTag_JournalId",
                 table: "JournalMoodTag",
-                column: "MoodTagsId");
+                column: "JournalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JournalMoodTag_MoodTagId",
+                table: "JournalMoodTag",
+                column: "MoodTagId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JournalMoodTag_MoodTagId1",
+                table: "JournalMoodTag",
+                column: "MoodTagId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Journals_UserId",
