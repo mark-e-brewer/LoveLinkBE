@@ -65,8 +65,8 @@ namespace LoveLink
                      }
                  );
             modelBuilder.Entity<JournalMoodTag>().HasData(
-                new JournalMoodTag { Id = 3, JournalId = 1, MoodTagId = 1, Journal = null, MoodTag = null },
-                new JournalMoodTag { Id = 4, JournalId = 2, MoodTagId = 2, Journal = null, MoodTag = null }
+                new JournalMoodTag { JournalId = 1, MoodTagId = 1, Journal = null, MoodTag = null },
+                new JournalMoodTag { JournalId = 2, MoodTagId = 2, Journal = null, MoodTag = null }
             );
 
             modelBuilder.Entity<MoodTag>().HasData(
