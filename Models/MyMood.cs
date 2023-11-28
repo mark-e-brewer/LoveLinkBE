@@ -6,7 +6,6 @@ namespace LoveLink.Models
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        required
         public int? UserId { get; set; }
         public string? UserName { get; set; }
         public int? PartnerId { get; set; }
@@ -14,6 +13,6 @@ namespace LoveLink.Models
         public string? Mood { get; set; }
         public string? Notes { get; set; }
         public DateTime? DateTimeSet { get; set; }
-        public User? User { get; set; }
+        public ICollection<User>? Users { get; set; }
     }
 }

@@ -6,7 +6,6 @@ namespace LoveLink.Models
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        required
         public int? SourceUserId { get; set; }
         public string? SourceUserName { get; set; }
         public int? ReceivingUserId { get; set; }

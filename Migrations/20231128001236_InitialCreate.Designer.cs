@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoveLink.Migrations
 {
     [DbContext(typeof(LoveLinkDbContext))]
-    [Migration("20231118022121_PkAutoGenerateFix")]
-    partial class PkAutoGenerateFix
+    [Migration("20231128001236_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -63,7 +63,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateEntered = new DateTime(2023, 11, 17, 20, 21, 21, 178, DateTimeKind.Local).AddTicks(3711),
+                            DateEntered = new DateTime(2023, 11, 27, 18, 12, 36, 482, DateTimeKind.Local).AddTicks(6167),
                             Entry = "This is the first entry.",
                             Name = "Mark's first Journal Entry",
                             PartnerId = 2,
@@ -74,7 +74,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateEntered = new DateTime(2023, 11, 17, 20, 21, 21, 178, DateTimeKind.Local).AddTicks(3756),
+                            DateEntered = new DateTime(2023, 11, 27, 18, 12, 36, 482, DateTimeKind.Local).AddTicks(6204),
                             Entry = "This is Alex's entry.",
                             Name = "Alex's first Journal Entry",
                             PartnerId = 1,
@@ -86,50 +86,22 @@ namespace LoveLink.Migrations
 
             modelBuilder.Entity("LoveLink.Models.JournalMoodTag", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
                     b.Property<int>("JournalId")
                         .HasColumnType("integer");
 
                     b.Property<int>("MoodTagId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("MoodTagId1")
+                    b.Property<int>("JournalsId")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("JournalId", "MoodTagId");
 
-                    b.HasIndex("JournalId");
+                    b.HasIndex("JournalsId");
 
                     b.HasIndex("MoodTagId");
 
-                    b.HasIndex("MoodTagId1");
-
-                    b.ToTable("JournalMoodTag");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            JournalId = 1,
-                            MoodTagId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            JournalId = 1,
-                            MoodTagId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            JournalId = 2,
-                            MoodTagId = 2
-                        });
+                    b.ToTable("JournalMoodTags", (string)null);
                 });
 
             modelBuilder.Entity("LoveLink.Models.MoodTag", b =>
@@ -217,7 +189,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateTimeSet = new DateTime(2023, 11, 17, 20, 21, 21, 179, DateTimeKind.Local).AddTicks(7404),
+                            DateTimeSet = new DateTime(2023, 11, 27, 18, 12, 36, 484, DateTimeKind.Local).AddTicks(1013),
                             Mood = "Happy",
                             Notes = "Feeling great today!",
                             PartnerId = 2,
@@ -228,7 +200,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateTimeSet = new DateTime(2023, 11, 17, 20, 21, 21, 179, DateTimeKind.Local).AddTicks(7425),
+                            DateTimeSet = new DateTime(2023, 11, 27, 18, 12, 36, 484, DateTimeKind.Local).AddTicks(1039),
                             Mood = "Calm",
                             Notes = "Taking it easy.",
                             PartnerId = 1,
@@ -282,7 +254,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateSet = new DateTime(2023, 11, 17, 20, 21, 21, 180, DateTimeKind.Local).AddTicks(8288),
+                            DateSet = new DateTime(2023, 11, 27, 18, 12, 36, 485, DateTimeKind.Local).AddTicks(156),
                             LinkToSource = "https://example.com/message",
                             ReceivingUserId = 2,
                             ReceivingUserName = "Alex",
@@ -294,7 +266,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateSet = new DateTime(2023, 11, 17, 20, 21, 21, 180, DateTimeKind.Local).AddTicks(8309),
+                            DateSet = new DateTime(2023, 11, 27, 18, 12, 36, 485, DateTimeKind.Local).AddTicks(176),
                             LinkToSource = "https://example.com/friend-request",
                             ReceivingUserId = 1,
                             ReceivingUserName = "Mark",
@@ -392,27 +364,23 @@ namespace LoveLink.Migrations
 
             modelBuilder.Entity("LoveLink.Models.JournalMoodTag", b =>
                 {
-                    b.HasOne("LoveLink.Models.Journal", null)
+                    b.HasOne("LoveLink.Models.Journal", "Journal")
                         .WithMany()
                         .HasForeignKey("JournalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LoveLink.Models.Journal", "Journal")
+                    b.HasOne("LoveLink.Models.Journal", null)
                         .WithMany()
-                        .HasForeignKey("MoodTagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LoveLink.Models.MoodTag", null)
-                        .WithMany()
-                        .HasForeignKey("MoodTagId")
+                        .HasForeignKey("JournalsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("LoveLink.Models.MoodTag", "MoodTag")
                         .WithMany()
-                        .HasForeignKey("MoodTagId1");
+                        .HasForeignKey("MoodTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Journal");
 

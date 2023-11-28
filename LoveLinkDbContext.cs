@@ -49,25 +49,12 @@ namespace LoveLink
                 }
             );
             modelBuilder.Entity<Journal>()
-                 .HasMany(j => j.MoodTags)
-                 .WithMany(mt => mt.Journals)
-                 .UsingEntity<JournalMoodTag>(
-                     jmt => jmt
-                         .HasOne<MoodTag>().WithMany().HasForeignKey("MoodTagId"),
-                     mt => mt
-                         .HasOne<Journal>().WithMany().HasForeignKey("JournalId"),
-                     // Configure the primary key for the join table
-                     jmt =>
-                     {
-                         jmt.HasKey("Id");
-                         jmt.Property<int>("Id").ValueGeneratedOnAdd(); // Specify that Id is generated on add
-                         jmt.HasData(new { Id = 1, JournalId = 1, MoodTagId = 1 });
-                     }
-                 );
-            modelBuilder.Entity<JournalMoodTag>().HasData(
-                new JournalMoodTag { JournalId = 1, MoodTagId = 1, Journal = null, MoodTag = null },
-                new JournalMoodTag { JournalId = 2, MoodTagId = 2, Journal = null, MoodTag = null }
-            );
+            .HasMany(j => j.MoodTags)
+            .WithMany(mt => mt.Journals)
+            .UsingEntity<JournalMoodTag>(
+                jmt => jmt.ToTable("JournalMoodTags")
+                   .HasKey("JournalId", "MoodTagId")
+    );
 
             modelBuilder.Entity<MoodTag>().HasData(
                 new MoodTag { Id = 1, Name = "Happy", Description = "Feeling joyful and content" },
@@ -76,34 +63,30 @@ namespace LoveLink
                 new MoodTag { Id = 4, Name = "Reflective", Description = "Engaging in deep thought or meditation" }
 );
             modelBuilder.Entity<MyMood>().HasData(
-                new MyMood { Id = 1, UserId = 1, UserName = "Mark", PartnerId = 2, PartnerUid = "efg789hij0", Mood = "Happy", Notes = "Feeling great today!", DateTimeSet = DateTime.Now, User = null },
-                new MyMood { Id = 2, UserId = 2, UserName = "Alex", PartnerId = 1, PartnerUid = "123abc456d", Mood = "Calm", Notes = "Taking it easy.", DateTimeSet = DateTime.Now, User = null }
+                new MyMood { Id = 1, UserId = 1, UserName = "Mark", PartnerId = 2, PartnerUid = "efg789hij0", Mood = "Happy", Notes = "Feeling great today!", DateTimeSet = DateTime.Now, Users = null },
+                new MyMood { Id = 2, UserId = 2, UserName = "Alex", PartnerId = 1, PartnerUid = "123abc456d", Mood = "Calm", Notes = "Taking it easy.", DateTimeSet = DateTime.Now, Users = null }
 );
 
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.ReceivingUser)
-                .WithMany()  // Assuming that a user can have multiple notifications
+                .WithMany()
                 .HasForeignKey(n => n.ReceivingUserId)
-                .OnDelete(DeleteBehavior.Restrict); // Choose the appropriate delete behavior
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Your other configurations...
-
-            // Seed data
             modelBuilder.Entity<Notification>().HasData(new Notification
-                {
-                    Id = 1,
-                    SourceUserId = 1,
-                    SourceUserName = "Mark",
-                    ReceivingUserId = 2,
-                    ReceivingUserName = "Alex",
-                    Title = "Mark posted a journal entry",
-                    DateSet = DateTime.Now,
-                    Viewed = false,
-                    LinkToSource = "https://example.com/message",
-                    SourceUser = null,
-                    // Set the ReceivingUser property to an instance of the User entity
-                    ReceivingUser = null
-                },
+            {
+                Id = 1,
+                SourceUserId = 1,
+                SourceUserName = "Mark",
+                ReceivingUserId = 2,
+                ReceivingUserName = "Alex",
+                Title = "Mark posted a journal entry",
+                DateSet = DateTime.Now,
+                Viewed = false,
+                LinkToSource = "https://example.com/message",
+                SourceUser = null,
+                ReceivingUser = null
+            },
                 new Notification
                 {
                     Id = 2,
@@ -116,7 +99,6 @@ namespace LoveLink
                     Viewed = false,
                     LinkToSource = "https://example.com/friend-request",
                     SourceUser = null,
-                    // Set the ReceivingUser property to an instance of the User entity
                     ReceivingUser = null
                 }
             );

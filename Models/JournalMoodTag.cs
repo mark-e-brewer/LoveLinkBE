@@ -4,11 +4,14 @@ namespace LoveLink.Models
 {
     public class JournalMoodTag
     {
+        [ForeignKey("Journal")]
         public int JournalId { get; set; }
-        [ForeignKey("JournalId")]
-        public int MoodTagId { get; set; } // Foreign key to MoodTag
-        [ForeignKey("MoodTagId")]
-        public Journal? Journal { get; set; }
-        public MoodTag? MoodTag { get; set; }
+
+        [ForeignKey("MoodTag")]
+        public int MoodTagId { get; set; }
+
+        public Journal Journal { get; set; }
+
+        public MoodTag MoodTag { get; set; }
     }
 }
