@@ -6,6 +6,8 @@ using LoveLink;
 using Microsoft.AspNetCore.Builder;
 using System.Runtime.CompilerServices;
 using System.Net;
+using LoveLink.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,9 +37,11 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 builder.Services.AddNpgsql<LoveLinkDbContext>(builder.Configuration["LoveLinkDbConnectionString"]);
 
 // Set the JSON serializer options
-builder.Services.Configure<JsonOptions>(options =>
+
+builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.WriteIndented = true;
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
 var app = builder.Build();
@@ -123,83 +127,6 @@ app.MapPut("/user/{id}", (LoveLinkDbContext db, int id, User updatedUser) =>
     return Results.Ok(existingUser);
 });
 
-
-//USER ENDPOINTS
-
-//GET All Users
-app.MapGet("/users", (LoveLinkDbContext db) =>
-{
-    return db.Users.ToList();
-});
-//GET User by Id
-app.MapGet("/user/{id}", (LoveLinkDbContext db, int id) =>
-{
-    var user = db.Users.Where(u => u.Id == id);
-    return user;
-});
-//POST new User
-app.MapPost("/newUser", (LoveLinkDbContext db, User user) =>
-{
-    db.Users.Add(user);
-    db.SaveChanges();
-    return Results.Created($"/newUser/{user.Id}", user);
-
-});
-//DELETE User
-app.MapDelete("/user/{id}", (LoveLinkDbContext db, int id) =>
-{
-
-    var userToDelete = db.Users.Where(u => u.Id == id).FirstOrDefault();
-
-    if (userToDelete == null)
-    {
-        return Results.NotFound("User not found");
-    }
-
-    db.Users.Remove(userToDelete);
-    db.SaveChanges();
-    return Results.Ok(userToDelete);
-});
-//UPDATE User
-app.MapPut("/user/{id}", (LoveLinkDbContext db, int id, User updatedUser) =>
-{
-    var existingUser = db.Users.Where(u => u.Id == id).FirstOrDefault();
-
-    if (existingUser == null)
-    {
-        return Results.NotFound("User not found");
-    }
-
-    existingUser.UID = updatedUser.UID;
-    existingUser.Name = updatedUser.Name;
-    existingUser.Age = updatedUser.Age;
-    existingUser.Bio = updatedUser.Bio;
-    existingUser.Gender = updatedUser.Gender;
-    existingUser.ProfilePhoto = updatedUser.ProfilePhoto;
-    existingUser.PartnerId = updatedUser.PartnerId;
-    existingUser.PartnerUid = updatedUser.PartnerUid;
-    existingUser.AnniversaryDate = updatedUser.AnniversaryDate;
-    existingUser.PartnerCode = updatedUser.PartnerCode;
-
-
-    db.SaveChanges();
-
-    return Results.Ok(existingUser);
-});
-//GET User from UID
-app.MapGet("/checkuserid/{uid}", (LoveLinkDbContext db, string uid) =>
-{
-    var user = db.Users.Where(x => x.UID == uid).ToList();
-    if (uid == null)
-    {
-        return Results.NotFound();
-    }
-    else
-    {
-        return Results.Ok(user);
-    }
-});
-
 //JOURNAL ENDPOINTS
 
 //GET all of a Users PUBLIC Journals
@@ -252,7 +179,7 @@ app.MapGet("/journal/{id}", (LoveLinkDbContext db, int id) =>
     return journal;
 });
 //GET ALL Journals
-app.MapGet("/alljournals", (LoveLinkDbContext db) => 
+app.MapGet("/alljournals", (LoveLinkDbContext db) =>
 {
     return db.Journals.ToList();
 });
@@ -286,5 +213,57 @@ app.MapPut("/journal/{id}", (LoveLinkDbContext db, int id, Journal updatedJourna
 
     return Results.Ok(existingJournal);
 });
+//GET all MyMoods
+app.MapGet("/myMoods", (LoveLinkDbContext db) => 
+{
+    return db.MyMoods.ToList();
+});
+//POST a MyMood to a User by Id
+app.MapPost("/user/{userId}/mymood/{moodId}", async (LoveLinkDbContext db, int userId, int moodId) =>
+{
+    // Find the user and mood based on the provided IDs
+    var user = await db.Users.FindAsync(userId);
+    var mood = await db.MyMoods.FindAsync(moodId);
+
+    // Check if the user and mood exist
+    if (user == null || mood == null)
+    {
+        return Results.NotFound("User or mood not found");
+    }
+
+    // Attach the mood to the user
+    user.MyMood = mood;
+
+    // Save changes to the database
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+});
+//GET User with MyMood DTO
+app.MapGet("/userWithMyMood/{userId}", async (int userId, [FromServices] LoveLinkDbContext dbContext) =>
+{
+    var userWithMyMood = await dbContext.Users
+        .Include(u => u.MyMood)
+        .Where(u => u.Id == userId)
+        .Select(u => new MyMoodUserDto
+        {
+            UserId = u.Id,
+            UserName = u.Name,
+            MyMood = new MyMoodDto
+            {
+                MyMoodId = u.MyMood.Id,
+                MoodName = u.MyMood.Mood
+            }
+        })
+        .FirstOrDefaultAsync();
+
+    if (userWithMyMood == null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(userWithMyMood);
+});
+
 
 app.Run();
