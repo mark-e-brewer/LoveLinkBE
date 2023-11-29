@@ -3,6 +3,7 @@ using System;
 using LoveLink;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoveLink.Migrations
 {
     [DbContext(typeof(LoveLinkDbContext))]
-    partial class LoveLinkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231128234436_jmtDbContext")]
+    partial class jmtDbContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

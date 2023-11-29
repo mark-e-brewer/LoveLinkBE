@@ -8,6 +8,9 @@ using System.Runtime.CompilerServices;
 using System.Net;
 using LoveLink.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Json;
+using System.Xml;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -157,20 +160,39 @@ app.MapGet("/userprivatejournals/{id}", (LoveLinkDbContext db, int id) =>
 
     return Results.Ok(userPrivateJournals);
 });
-//GET ALL of a Users Journals
+//GET ALL of a Users Journals by User Id
 app.MapGet("/alluserjournals/{id}", (LoveLinkDbContext db, int id) =>
 {
-    var UserJournals = db.Users
-    .Include(j => j.Journals)
-    .FirstOrDefault(u => u.Id == id);
+    var user = db.Users
+        .Include(u => u.Journals)
+        .FirstOrDefault(u => u.Id == id);
 
-    if (UserJournals == null)
+    if (user == null)
     {
         return Results.NotFound(id);
     }
 
-    return Results.Ok(UserJournals);
+    var userDto = new UserDto
+    {
+        Id = user.Id,
+        UID = user.UID,
+        PartnerId = user.PartnerId,
+        PartnerUid = user.PartnerUid,
+        Journals = user.Journals.Select(j => new JournalDto
+        {
+            Id = j.Id,
+            UserId = j.UserId,
+            PartnerId = j.PartnerId,
+            PartnerUid = j.PartnerUid,
+            Name = j.Name,
+            Entry = j.Entry,
+            DateEntered = j.DateEntered,
+            Visibility = j.Visibility,
+            MoodTags = j.MoodTags // Assuming MoodTag is another DTO or model with similar structure
+        }).ToList()
+    };
 
+    return Results.Ok(userDto);
 });
 //GET Journal by Id
 app.MapGet("/journal/{id}", (LoveLinkDbContext db, int id) =>
@@ -264,6 +286,114 @@ app.MapGet("/userWithMyMood/{userId}", async (int userId, [FromServices] LoveLin
 
     return Results.Ok(userWithMyMood);
 });
+//POST MoodTags to an existing Journal
+app.MapPost("/attachmoodtags/{journalId}/{moodTagId}", (LoveLinkDbContext db, int journalId, int moodTagId) =>
+{
+    // Retrieve the Journal and MoodTag from the database
+    var journal = db.Journals.Find(journalId);
+    var moodTag = db.MoodTags.Find(moodTagId);
 
+    if (journal == null || moodTag == null)
+    {
+        return Results.NotFound("Journal or MoodTag not found");
+    }
+
+    // Check if the relationship already exists
+    var existingRelation = db.JournalMoodTags
+        .Any(jmt => jmt.JournalId == journalId && jmt.MoodTagId == moodTagId);
+
+    if (!existingRelation)
+    {
+        // Create a new entry in the join table
+        var journalMoodTag = new JournalMoodTag
+        {
+            JournalId = journalId,
+            MoodTagId = moodTagId
+        };
+
+        db.JournalMoodTags.Add(journalMoodTag);
+        db.SaveChanges();
+
+        return Results.Ok("MoodTag attached to Journal successfully");
+    }
+
+    return Results.Ok("Relationship already exists"); ;
+});
+//POST MULTIPLE MoodTags to a Journal
+app.MapPost("/attachmanymoodtags/{journalId}", (LoveLinkDbContext db, int journalId, List<int> moodTagIds) =>
+{
+    // Retrieve the Journal from the database
+    var journal = db.Journals.Find(journalId);
+
+    if (journal == null)
+    {
+        return Results.NotFound("Journal not found");
+    }
+
+    // Track attached MoodTags to avoid duplicates
+    var attachedMoodTags = new HashSet<int>();
+
+    foreach (var moodTagId in moodTagIds)
+    {
+        // Retrieve the MoodTag from the database
+        var moodTag = db.MoodTags.Find(moodTagId);
+
+        if (moodTag != null && !attachedMoodTags.Contains(moodTagId))
+        {
+            // Check if the relationship already exists
+            var existingRelation = db.JournalMoodTags
+                .Any(jmt => jmt.JournalId == journalId && jmt.MoodTagId == moodTagId);
+
+            if (!existingRelation)
+            {
+                // Create a new entry in the join table
+                var journalMoodTag = new JournalMoodTag
+                {
+                    JournalId = journalId,
+                    MoodTagId = moodTagId
+                };
+
+                db.JournalMoodTags.Add(journalMoodTag);
+                attachedMoodTags.Add(moodTagId);
+            }
+        }
+    }
+
+    db.SaveChanges();
+
+    return Results.Ok("MoodTags attached to Journal successfully");
+});
+//GET Journal with MoodTags
+app.MapGet("/journalwithmoodtags/{journalId}", (LoveLinkDbContext db, int journalId) =>
+{
+    var journalWithMoodTags = db.Journals
+        .Where(j => j.Id == journalId)
+        .Include(j => j.MoodTags)
+        .Select(j => new JournalWithMoodTagsDTO
+        {
+            Id = j.Id,
+            UserId = j.UserId,
+            PartnerId = j.PartnerId,
+            PartnerUid = j.PartnerUid,
+            Name = j.Name,
+            Entry = j.Entry,
+            DateEntered = j.DateEntered,
+            Visibility = j.Visibility,
+            MoodTags = j.MoodTags.Select(mt => new MoodTagDTO
+            {
+                Id = mt.Id,
+                Name = mt.Name,
+                Description = mt.Description
+            }).ToList()
+        })
+        .FirstOrDefault();
+
+    if (journalWithMoodTags == null)
+    {
+        return Results.NotFound(journalId);
+    }
+
+    return Results.Ok(journalWithMoodTags);
+});
 
 app.Run();

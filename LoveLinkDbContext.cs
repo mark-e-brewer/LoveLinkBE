@@ -11,6 +11,7 @@ namespace LoveLink
         public DbSet<MyMood> MyMoods { get; set; }
         public DbSet<MoodTag> MoodTags { get; set; }
         public DbSet<Journal> Journals { get; set; }
+        public DbSet<JournalMoodTag> JournalMoodTags { get; set; }
 
         public LoveLinkDbContext(DbContextOptions<LoveLinkDbContext> context) : base(context) { }
 
