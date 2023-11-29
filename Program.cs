@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using System.Runtime.CompilerServices;
 using System.Net;
 using LoveLink.DTOs;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Json;
 using System.Xml;
@@ -235,6 +236,22 @@ app.MapPut("/journal/{id}", (LoveLinkDbContext db, int id, Journal updatedJourna
 
     return Results.Ok(existingJournal);
 });
+//DELETE a Journal
+app.MapDelete("/deletejournal/{journalId}", (LoveLinkDbContext db, int journalId) =>
+{
+
+    var journal = db.Journals.Find(journalId);
+
+    if (journal == null)
+    {
+        return Results.NotFound("Journal not found");
+    }
+
+    db.Journals.Remove(journal);
+    db.SaveChanges();
+
+    return Results.Ok("Journal deleted successfully");
+});
 //GET all MyMoods
 app.MapGet("/myMoods", (LoveLinkDbContext db) => 
 {
@@ -243,20 +260,15 @@ app.MapGet("/myMoods", (LoveLinkDbContext db) =>
 //POST a MyMood to a User by Id
 app.MapPost("/user/{userId}/mymood/{moodId}", async (LoveLinkDbContext db, int userId, int moodId) =>
 {
-    // Find the user and mood based on the provided IDs
     var user = await db.Users.FindAsync(userId);
     var mood = await db.MyMoods.FindAsync(moodId);
 
-    // Check if the user and mood exist
     if (user == null || mood == null)
     {
         return Results.NotFound("User or mood not found");
     }
-
-    // Attach the mood to the user
     user.MyMood = mood;
 
-    // Save changes to the database
     await db.SaveChangesAsync();
 
     return Results.Ok();
@@ -289,7 +301,7 @@ app.MapGet("/userWithMyMood/{userId}", async (int userId, [FromServices] LoveLin
 //POST MoodTags to an existing Journal
 app.MapPost("/attachmoodtags/{journalId}/{moodTagId}", (LoveLinkDbContext db, int journalId, int moodTagId) =>
 {
-    // Retrieve the Journal and MoodTag from the database
+
     var journal = db.Journals.Find(journalId);
     var moodTag = db.MoodTags.Find(moodTagId);
 
@@ -298,13 +310,12 @@ app.MapPost("/attachmoodtags/{journalId}/{moodTagId}", (LoveLinkDbContext db, in
         return Results.NotFound("Journal or MoodTag not found");
     }
 
-    // Check if the relationship already exists
     var existingRelation = db.JournalMoodTags
         .Any(jmt => jmt.JournalId == journalId && jmt.MoodTagId == moodTagId);
 
     if (!existingRelation)
     {
-        // Create a new entry in the join table
+
         var journalMoodTag = new JournalMoodTag
         {
             JournalId = journalId,
@@ -322,31 +333,25 @@ app.MapPost("/attachmoodtags/{journalId}/{moodTagId}", (LoveLinkDbContext db, in
 //POST MULTIPLE MoodTags to a Journal
 app.MapPost("/attachmanymoodtags/{journalId}", (LoveLinkDbContext db, int journalId, List<int> moodTagIds) =>
 {
-    // Retrieve the Journal from the database
     var journal = db.Journals.Find(journalId);
 
     if (journal == null)
     {
         return Results.NotFound("Journal not found");
     }
-
-    // Track attached MoodTags to avoid duplicates
     var attachedMoodTags = new HashSet<int>();
 
     foreach (var moodTagId in moodTagIds)
     {
-        // Retrieve the MoodTag from the database
         var moodTag = db.MoodTags.Find(moodTagId);
 
         if (moodTag != null && !attachedMoodTags.Contains(moodTagId))
         {
-            // Check if the relationship already exists
             var existingRelation = db.JournalMoodTags
                 .Any(jmt => jmt.JournalId == journalId && jmt.MoodTagId == moodTagId);
 
             if (!existingRelation)
             {
-                // Create a new entry in the join table
                 var journalMoodTag = new JournalMoodTag
                 {
                     JournalId = journalId,
@@ -395,5 +400,38 @@ app.MapGet("/journalwithmoodtags/{journalId}", (LoveLinkDbContext db, int journa
 
     return Results.Ok(journalWithMoodTags);
 });
+//UPDATE MoodTags Associated with Journal
+app.MapPut("/editmoodtags/{journalId}", (LoveLinkDbContext db, int journalId, List<int> moodTagIds) =>
+{
+    // Retrieve the Journal from the database
+    var journal = db.Journals
+        .Include(j => j.MoodTags)
+        .FirstOrDefault(j => j.Id == journalId);
+
+    if (journal == null)
+    {
+        return Results.NotFound("Journal not found");
+    }
+
+    // Clear existing MoodTags
+    journal.MoodTags.Clear();
+
+    // Attach new MoodTags
+    foreach (var moodTagId in moodTagIds)
+    {
+        var moodTag = db.MoodTags.Find(moodTagId);
+        if (moodTag != null)
+        {
+            // Create a new JournalMoodTag and add it to the collection
+            var journalMoodTag = new JournalMoodTag { JournalId = journal.Id, MoodTagId = moodTagId };
+            db.JournalMoodTags.Add(journalMoodTag);
+        }
+    }
+
+    db.SaveChanges();
+
+    return Results.Ok("MoodTags updated successfully");
+});
+
 
 app.Run();
