@@ -298,7 +298,7 @@ app.MapGet("/userWithMyMood/{userId}", async (int userId, [FromServices] LoveLin
 
     return Results.Ok(userWithMyMood);
 });
-//POST MoodTags to an existing Journal
+//POST SINGLE MoodTags to an existing Journal
 app.MapPost("/attachmoodtags/{journalId}/{moodTagId}", (LoveLinkDbContext db, int journalId, int moodTagId) =>
 {
 
@@ -329,44 +329,6 @@ app.MapPost("/attachmoodtags/{journalId}/{moodTagId}", (LoveLinkDbContext db, in
     }
 
     return Results.Ok("Relationship already exists"); ;
-});
-//POST MULTIPLE MoodTags to a Journal
-app.MapPost("/attachmanymoodtags/{journalId}", (LoveLinkDbContext db, int journalId, List<int> moodTagIds) =>
-{
-    var journal = db.Journals.Find(journalId);
-
-    if (journal == null)
-    {
-        return Results.NotFound("Journal not found");
-    }
-    var attachedMoodTags = new HashSet<int>();
-
-    foreach (var moodTagId in moodTagIds)
-    {
-        var moodTag = db.MoodTags.Find(moodTagId);
-
-        if (moodTag != null && !attachedMoodTags.Contains(moodTagId))
-        {
-            var existingRelation = db.JournalMoodTags
-                .Any(jmt => jmt.JournalId == journalId && jmt.MoodTagId == moodTagId);
-
-            if (!existingRelation)
-            {
-                var journalMoodTag = new JournalMoodTag
-                {
-                    JournalId = journalId,
-                    MoodTagId = moodTagId
-                };
-
-                db.JournalMoodTags.Add(journalMoodTag);
-                attachedMoodTags.Add(moodTagId);
-            }
-        }
-    }
-
-    db.SaveChanges();
-
-    return Results.Ok("MoodTags attached to Journal successfully");
 });
 //GET Journal with MoodTags
 app.MapGet("/journalwithmoodtags/{journalId}", (LoveLinkDbContext db, int journalId) =>
@@ -401,9 +363,8 @@ app.MapGet("/journalwithmoodtags/{journalId}", (LoveLinkDbContext db, int journa
     return Results.Ok(journalWithMoodTags);
 });
 //UPDATE MoodTags Associated with Journal
-app.MapPut("/editmoodtags/{journalId}", (LoveLinkDbContext db, int journalId, List<int> moodTagIds) =>
+app.MapPut("/editmoodtags/{journalId}", (LoveLinkDbContext db, int journalId, MoodTagIds tagIds) =>
 {
-    // Retrieve the Journal from the database
     var journal = db.Journals
         .Include(j => j.MoodTags)
         .FirstOrDefault(j => j.Id == journalId);
@@ -413,24 +374,45 @@ app.MapPut("/editmoodtags/{journalId}", (LoveLinkDbContext db, int journalId, Li
         return Results.NotFound("Journal not found");
     }
 
-    // Clear existing MoodTags
     journal.MoodTags.Clear();
 
-    // Attach new MoodTags
-    foreach (var moodTagId in moodTagIds)
+    foreach (var moodTagId in tagIds.TagIds)
     {
         var moodTag = db.MoodTags.Find(moodTagId);
         if (moodTag != null)
         {
-            // Create a new JournalMoodTag and add it to the collection
-            var journalMoodTag = new JournalMoodTag { JournalId = journal.Id, MoodTagId = moodTagId };
-            db.JournalMoodTags.Add(journalMoodTag);
+            journal.MoodTags.Add(moodTag);
         }
     }
 
     db.SaveChanges();
 
     return Results.Ok("MoodTags updated successfully");
+});
+//POST MULTIPLE MoodTags to a Journal
+app.MapPost("/attachmanymoodtags/{journalId}", (LoveLinkDbContext db, int journalId, MoodTagIds tagIds) =>
+{
+    var journal = db.Journals
+    .Include(j => j.MoodTags)
+    .FirstOrDefault(j => j.Id == journalId);
+
+    if (journal == null)
+    {
+        return Results.NotFound("Journal not found");
+    }
+
+    foreach (var moodTagId in tagIds.TagIds)
+    {
+        var moodTag = db.MoodTags.Find(moodTagId);
+        if (moodTag != null)
+        {
+            journal.MoodTags.Add(moodTag);
+        }
+    }
+
+    db.SaveChanges();
+
+    return Results.Ok("MoodTags attached to Journal successfully");
 });
 
 
