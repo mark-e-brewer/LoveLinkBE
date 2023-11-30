@@ -15,7 +15,7 @@ namespace LoveLink.Models
         public int? PartnerId { get; set; }
         public string? PartnerUid { get; set; }
         public DateTime? AnniversaryDate { get; set; }
-        public int? PartnerCode { get; set; }
+        public string? PartnerCode { get; set; }
         public MyMood? MyMood { get; set; }
         public ICollection<Journal>? Journals { get; set; }
         public ICollection<Notification>? Notifications { get; set; }
