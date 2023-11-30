@@ -15,6 +15,14 @@ namespace LoveLink
 
         public LoveLinkDbContext(DbContextOptions<LoveLinkDbContext> context) : base(context) { }
 
+        public static string GenerateRandomCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasData(

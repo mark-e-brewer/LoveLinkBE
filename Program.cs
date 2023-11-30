@@ -51,7 +51,70 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 var app = builder.Build();
 
 app.UseCors(MyAllowSpecificOrigins);
+//POST Partner Code
+app.MapPost("/generatePartnerCode/{userid}", async (LoveLinkDbContext db, HttpContext context, int userid) =>
+{
+    // Assuming you have a user ID to associate the partner code with
+    int userId = userid;
 
+    // Generate a unique 6-digit code
+    string partnerCode = LoveLinkDbContext.GenerateRandomCode();
+
+    // Update the user's PartnerCode in the database
+    var user = await db.Users.FindAsync(userId);
+    if (user != null)
+    {
+        user.PartnerCode = partnerCode;
+        await db.SaveChangesAsync();
+    }
+
+    // Return the generated code
+    await context.Response.WriteAsync(partnerCode);
+});
+//FIND Matching Partner and attach needed info to both users
+app.MapPost("/handlePartnerCode/{enteredCode}/{enteringUserId}", async (LoveLinkDbContext db, HttpContext context, string enteredCode, int enteringUserId) =>
+{
+    // Find the user entering the code
+    var enteringUser = await db.Users.FirstOrDefaultAsync(u => u.Id == enteringUserId);
+
+    if (enteringUser != null)
+    {
+        // Find the partner user with the entered code
+        var partnerUser = await db.Users.FirstOrDefaultAsync(u => u.PartnerCode == enteredCode);
+
+        if (partnerUser != null)
+        {
+            // Update the entering user's Partner information
+            enteringUser.PartnerUid = partnerUser.UID;
+            enteringUser.PartnerId = partnerUser.Id;
+
+            // Update the partner user's Partner information
+            partnerUser.PartnerUid = enteringUser.UID;
+            partnerUser.PartnerId = enteringUser.Id;
+
+            // Clear the PartnerCode for both users
+            enteringUser.PartnerCode = enteredCode;
+            partnerUser.PartnerCode = enteredCode;
+
+            // Save changes to the database
+            await db.SaveChangesAsync();
+
+            // Return a success message or any other relevant response
+            await context.Response.WriteAsync("Partner linking successful!");
+        }
+        else
+        {
+            // Handle the case when no user with the entered code is found
+            await context.Response.WriteAsync("Invalid partner code. Please try again.");
+        }
+    }
+    else
+    {
+        // Handle the case when the entering user or the entered code is invalid
+        await context.Response.WriteAsync("Invalid user or partner code. Please try again.");
+    }
+});
+//GET User from UID
 app.MapGet("/uservalidate/{uid}", (LoveLinkDbContext db, string uid) =>
 {
     var userExists = db.Users.Where(x => x.UID == uid).FirstOrDefault();
@@ -89,7 +152,7 @@ app.MapPost("/newUser", (LoveLinkDbContext db, User user) =>
     return Results.Created($"/newUser/{user.Id}", user);
 
 });
-
+//DELETE a User by Id
 app.MapDelete("/user/{id}", (LoveLinkDbContext db, int id) =>
 {
 
@@ -104,7 +167,7 @@ app.MapDelete("/user/{id}", (LoveLinkDbContext db, int id) =>
     db.SaveChanges();
     return Results.Ok(userToDelete);
 });
-
+//UPDATE a User by Id
 app.MapPut("/user/{id}", (LoveLinkDbContext db, int id, User updatedUser) =>
 {
     var existingUser = db.Users.Where(u => u.Id == id).FirstOrDefault();
@@ -252,6 +315,9 @@ app.MapDelete("/deletejournal/{journalId}", (LoveLinkDbContext db, int journalId
 
     return Results.Ok("Journal deleted successfully");
 });
+
+//MyMood Endpoints
+
 //GET all MyMoods
 app.MapGet("/myMoods", (LoveLinkDbContext db) => 
 {
@@ -283,11 +349,13 @@ app.MapGet("/userWithMyMood/{userId}", async (int userId, [FromServices] LoveLin
         {
             UserId = u.Id,
             UserName = u.Name,
-            MyMood = new MyMoodDto
-            {
-                MyMoodId = u.MyMood.Id,
-                MoodName = u.MyMood.Mood
-            }
+            MyMood = u.MyMood != null
+                ? new MyMoodDto
+                {
+                    MyMoodId = u.MyMood.Id,
+                    MoodName = u.MyMood.Mood
+                }
+                : null // Set to null if MyMood is not present
         })
         .FirstOrDefaultAsync();
 
@@ -298,6 +366,28 @@ app.MapGet("/userWithMyMood/{userId}", async (int userId, [FromServices] LoveLin
 
     return Results.Ok(userWithMyMood);
 });
+//REMOVE MyMood from User by Id
+app.MapDelete("/removemymood/{userId}", async (LoveLinkDbContext db, int userId) =>
+{
+        var user = await db.Users
+            .Include(u => u.MyMood)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+        {
+            return Results.NotFound($"User with ID {userId} not found.");
+        }
+
+        // Remove the mood from the user
+        user.MyMood = null; // This will remove the association
+
+        await db.SaveChangesAsync();
+
+        return Results.NoContent(); // 204 No Content
+});
+
+//MoodTag Endpoints
+
 //POST SINGLE MoodTags to an existing Journal
 app.MapPost("/attachmoodtags/{journalId}/{moodTagId}", (LoveLinkDbContext db, int journalId, int moodTagId) =>
 {
