@@ -86,9 +86,9 @@ namespace LoveLink
             {
                 Id = 1,
                 SourceUserId = 1,
-                SourceUserName = "Mark",
+                SourceUserName = "Been a Long Day",
                 ReceivingUserId = 2,
-                ReceivingUserName = "Alex",
+                ReceivingUserName = null,
                 Title = "Mark posted a journal entry",
                 DateSet = DateTime.Now,
                 Viewed = false,
@@ -100,9 +100,9 @@ namespace LoveLink
                 {
                     Id = 2,
                     SourceUserId = 2,
-                    SourceUserName = "Alex",
+                    SourceUserName = null,
                     ReceivingUserId = 1,
-                    ReceivingUserName = "Mark",
+                    ReceivingUserName = "Happy",
                     Title = "Alex set Their Mood To 'Happy'",
                     DateSet = DateTime.Now,
                     Viewed = false,

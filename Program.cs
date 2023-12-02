@@ -15,6 +15,11 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 //ADD CORS
 builder.Services.AddCors(options =>
@@ -22,8 +27,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy(MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://localhost:7205",
-                                "http://localhost:5145")
+            policy.WithOrigins("https://localhost:3000",
+                                "http://localhost:7205")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
         });
@@ -50,81 +55,6 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 var app = builder.Build();
 
-app.UseCors(MyAllowSpecificOrigins);
-//POST Partner Code
-app.MapPost("/generatePartnerCode/{userid}", async (LoveLinkDbContext db, HttpContext context, int userid) =>
-{
-    // Assuming you have a user ID to associate the partner code with
-    int userId = userid;
-
-    // Generate a unique 6-digit code
-    string partnerCode = LoveLinkDbContext.GenerateRandomCode();
-
-    // Update the user's PartnerCode in the database
-    var user = await db.Users.FindAsync(userId);
-    if (user != null)
-    {
-        user.PartnerCode = partnerCode;
-        await db.SaveChangesAsync();
-    }
-
-    // Return the generated code
-    await context.Response.WriteAsync(partnerCode);
-});
-//FIND Matching Partner and attach needed info to both users
-app.MapPost("/handlePartnerCode/{enteredCode}/{enteringUserId}", async (LoveLinkDbContext db, HttpContext context, string enteredCode, int enteringUserId) =>
-{
-    // Find the user entering the code
-    var enteringUser = await db.Users.FirstOrDefaultAsync(u => u.Id == enteringUserId);
-
-    if (enteringUser != null)
-    {
-        // Find the partner user with the entered code
-        var partnerUser = await db.Users.FirstOrDefaultAsync(u => u.PartnerCode == enteredCode);
-
-        if (partnerUser != null)
-        {
-            // Update the entering user's Partner information
-            enteringUser.PartnerUid = partnerUser.UID;
-            enteringUser.PartnerId = partnerUser.Id;
-
-            // Update the partner user's Partner information
-            partnerUser.PartnerUid = enteringUser.UID;
-            partnerUser.PartnerId = enteringUser.Id;
-
-            // Clear the PartnerCode for both users
-            enteringUser.PartnerCode = enteredCode;
-            partnerUser.PartnerCode = enteredCode;
-
-            // Save changes to the database
-            await db.SaveChangesAsync();
-
-            // Return a success message or any other relevant response
-            await context.Response.WriteAsync("Partner linking successful!");
-        }
-        else
-        {
-            // Handle the case when no user with the entered code is found
-            await context.Response.WriteAsync("Invalid partner code. Please try again.");
-        }
-    }
-    else
-    {
-        // Handle the case when the entering user or the entered code is invalid
-        await context.Response.WriteAsync("Invalid user or partner code. Please try again.");
-    }
-});
-//GET User from UID
-app.MapGet("/uservalidate/{uid}", (LoveLinkDbContext db, string uid) =>
-{
-    var userExists = db.Users.Where(x => x.UID == uid).FirstOrDefault();
-    if (userExists == null)
-    {
-        return Results.StatusCode(204);
-    }
-    return Results.Ok(userExists);
-});
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -133,6 +63,94 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+app.MapControllers();
+//POST Partner Code
+app.MapPost("/generatePartnerCode/{userid}", async (LoveLinkDbContext db, HttpContext context, int userid) =>
+{
+    int userId = userid;
+
+    string partnerCode = LoveLinkDbContext.GenerateRandomCode();
+
+    var user = await db.Users.FindAsync(userId);
+    if (user != null)
+    {
+        user.PartnerCode = partnerCode;
+        await db.SaveChangesAsync();
+    }
+
+    await context.Response.WriteAsync(partnerCode);
+});
+//FIND Matching Partner and attach needed info to both users
+app.MapPost("/handlePartnerCode/{enteredCode}/{enteringUserId}", async (LoveLinkDbContext db, HttpContext context, string enteredCode, int enteringUserId) =>
+{
+    var enteringUser = await db.Users.FirstOrDefaultAsync(u => u.Id == enteringUserId);
+
+    if (enteringUser != null)
+    {
+
+        var partnerUser = await db.Users.FirstOrDefaultAsync(u => u.PartnerCode == enteredCode);
+
+        if (partnerUser != null)
+        {
+
+            enteringUser.PartnerUid = partnerUser.UID;
+            enteringUser.PartnerId = partnerUser.Id;
+
+            partnerUser.PartnerUid = enteringUser.UID;
+            partnerUser.PartnerId = enteringUser.Id;
+
+            enteringUser.PartnerCode = enteredCode;
+            partnerUser.PartnerCode = enteredCode;
+
+            await db.SaveChangesAsync();
+
+            await context.Response.WriteAsync("Partner linking successful!");
+        }
+        else
+        {
+            await context.Response.WriteAsync("Invalid partner code. Please try again.");
+        }
+    }
+    else
+    {
+
+        await context.Response.WriteAsync("Invalid user or partner code. Please try again.");
+    }
+});
+//GET User from UID
+app.MapGet("/checkuser/{uid}", (LoveLinkDbContext db, string uid) =>
+{
+    var userExists = db.Users.Where(x => x.UID == uid).FirstOrDefault();
+    if (userExists == null)
+    {
+        return Results.StatusCode(204);
+    }
+    return Results.Ok(userExists);
+});
+//CREATE a User
+app.MapPost("/api/user", (LoveLinkDbContext db, User user) =>
+{
+    db.Users.Add(user);
+    db.SaveChanges();
+    return Results.Created($"/api/user/{user.Id}", user);
+});
+//GET UID from User Id
+app.MapGet("/useruidFromId/{id}", (LoveLinkDbContext db, int id) => 
+{
+    var userExists = db.Users.Where(x => x.Id == id).FirstOrDefault();
+    if (userExists == null)
+    {
+        return Results.StatusCode(204);
+    }
+    return Results.Ok(userExists.UID);
+});
 //GET All Users
 app.MapGet("/users", (LoveLinkDbContext db) =>
 {
@@ -143,14 +161,6 @@ app.MapGet("/user/{id}", (LoveLinkDbContext db, int id) =>
 {
     var user = db.Users.Where(u => u.Id == id);
     return user;
-});
-
-app.MapPost("/newUser", (LoveLinkDbContext db, User user) =>
-{
-    db.Users.Add(user);
-    db.SaveChanges();
-    return Results.Created($"/newUser/{user.Id}", user);
-
 });
 //DELETE a User by Id
 app.MapDelete("/user/{id}", (LoveLinkDbContext db, int id) =>
