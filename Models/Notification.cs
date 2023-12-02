@@ -15,7 +15,7 @@ namespace LoveLink.Models
         public bool? Viewed { get; set; }
         public string? LinkToSource { get; set; }
         public User? SourceUser { get; set; }
-        [ForeignKey("ReceivingUserId")]  // Add this attribute
+        [ForeignKey("ReceivingUserId")]
         public User? ReceivingUser { get; set; }
     }
 }

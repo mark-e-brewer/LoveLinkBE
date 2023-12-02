@@ -3,6 +3,7 @@ using System;
 using LoveLink;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoveLink.Migrations
 {
     [DbContext(typeof(LoveLinkDbContext))]
-    partial class LoveLinkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231201020743_notificationTableChanges")]
+    partial class notificationTableChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,7 +63,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateEntered = new DateTime(2023, 11, 30, 20, 10, 10, 588, DateTimeKind.Local).AddTicks(4929),
+                            DateEntered = new DateTime(2023, 11, 30, 20, 7, 42, 902, DateTimeKind.Local).AddTicks(9768),
                             Entry = "This is the first entry.",
                             Name = "Mark's first Journal Entry",
                             PartnerId = 2,
@@ -72,7 +74,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateEntered = new DateTime(2023, 11, 30, 20, 10, 10, 588, DateTimeKind.Local).AddTicks(4975),
+                            DateEntered = new DateTime(2023, 11, 30, 20, 7, 42, 902, DateTimeKind.Local).AddTicks(9809),
                             Entry = "This is Alex's entry.",
                             Name = "Alex's first Journal Entry",
                             PartnerId = 1,
@@ -179,7 +181,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateTimeSet = new DateTime(2023, 11, 30, 20, 10, 10, 588, DateTimeKind.Local).AddTicks(7777),
+                            DateTimeSet = new DateTime(2023, 11, 30, 20, 7, 42, 903, DateTimeKind.Local).AddTicks(2467),
                             Mood = "Happy",
                             Notes = "Feeling great today!",
                             PartnerId = 2,
@@ -190,7 +192,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateTimeSet = new DateTime(2023, 11, 30, 20, 10, 10, 588, DateTimeKind.Local).AddTicks(7788),
+                            DateTimeSet = new DateTime(2023, 11, 30, 20, 7, 42, 903, DateTimeKind.Local).AddTicks(2475),
                             Mood = "Calm",
                             Notes = "Taking it easy.",
                             PartnerId = 1,
@@ -211,20 +213,20 @@ namespace LoveLink.Migrations
                     b.Property<DateTime?>("DateSet")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("JournalTitle")
+                        .HasColumnType("text");
+
                     b.Property<string>("LinkToSource")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MoodSet")
                         .HasColumnType("text");
 
                     b.Property<int?>("ReceivingUserId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ReceivingUserName")
-                        .HasColumnType("text");
-
                     b.Property<int?>("SourceUserId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("SourceUserName")
-                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");
@@ -244,21 +246,21 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateSet = new DateTime(2023, 11, 30, 20, 10, 10, 589, DateTimeKind.Local).AddTicks(6629),
+                            DateSet = new DateTime(2023, 11, 30, 20, 7, 42, 904, DateTimeKind.Local).AddTicks(109),
+                            JournalTitle = "Been a Long Day",
                             LinkToSource = "https://example.com/message",
                             ReceivingUserId = 2,
                             SourceUserId = 1,
-                            SourceUserName = "Been a Long Day",
                             Title = "Mark posted a journal entry",
                             Viewed = false
                         },
                         new
                         {
                             Id = 2,
-                            DateSet = new DateTime(2023, 11, 30, 20, 10, 10, 589, DateTimeKind.Local).AddTicks(6648),
+                            DateSet = new DateTime(2023, 11, 30, 20, 7, 42, 904, DateTimeKind.Local).AddTicks(128),
                             LinkToSource = "https://example.com/friend-request",
+                            MoodSet = "Happy",
                             ReceivingUserId = 1,
-                            ReceivingUserName = "Happy",
                             SourceUserId = 2,
                             Title = "Alex set Their Mood To 'Happy'",
                             Viewed = false
