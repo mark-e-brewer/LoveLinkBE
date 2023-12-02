@@ -27,9 +27,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy(MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://localhost:3000",
-                                "http://localhost:7205")
+            policy.WithOrigins("https://localhost:7205",
+                                "http://localhost:3000",
+                                "https://localhost:5145")
                                 .AllowAnyHeader()
+                                .AllowAnyOrigin()
                                 .AllowAnyMethod();
         });
 });
@@ -61,10 +63,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
-
-app.UseCors();
 
 app.UseAuthentication();
 
@@ -139,7 +140,7 @@ app.MapPost("/api/user", (LoveLinkDbContext db, User user) =>
 {
     db.Users.Add(user);
     db.SaveChanges();
-    return Results.Created($"/api/user/{user.Id}", user);
+    return Results.Created($"/user/{user.Id}", user);
 });
 //GET UID from User Id
 app.MapGet("/useruidFromId/{id}", (LoveLinkDbContext db, int id) => 
