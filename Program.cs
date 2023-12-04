@@ -76,16 +76,13 @@ app.MapControllers();
 app.MapPost("/generatePartnerCode/{userid}", async (LoveLinkDbContext db, HttpContext context, int userid) =>
 {
     int userId = userid;
-
     string partnerCode = LoveLinkDbContext.GenerateRandomCode();
-
     var user = await db.Users.FindAsync(userId);
     if (user != null)
     {
         user.PartnerCode = partnerCode;
         await db.SaveChangesAsync();
     }
-
     await context.Response.WriteAsync(partnerCode);
 });
 //FIND Matching Partner and attach needed info to both users
@@ -95,7 +92,6 @@ app.MapPost("/handlePartnerCode/{enteredCode}/{enteringUserId}", async (LoveLink
 
     if (enteringUser != null)
     {
-
         var partnerUser = await db.Users.FirstOrDefaultAsync(u => u.PartnerCode == enteredCode);
 
         if (partnerUser != null)
