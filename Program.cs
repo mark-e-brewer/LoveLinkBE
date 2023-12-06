@@ -121,6 +121,12 @@ app.MapPost("/handlePartnerCode/{enteredCode}/{enteringUserId}", async (LoveLink
         await context.Response.WriteAsync("Invalid user or partner code. Please try again.");
     }
 });
+//GET User by Id
+app.MapGet("/user/{id}", (LoveLinkDbContext db, int id) =>
+{
+    var user = db.Users.Where(u => u.Id == id);
+    return user;
+});
 //GET User from UID
 app.MapGet("/checkuser/{uid}", (LoveLinkDbContext db, string uid) =>
 {
@@ -152,12 +158,6 @@ app.MapGet("/useruidFromId/{id}", (LoveLinkDbContext db, int id) =>
 app.MapGet("/users", (LoveLinkDbContext db) =>
 {
     return db.Users.ToList();
-});
-//GET User by Id
-app.MapGet("/user/{id}", (LoveLinkDbContext db, int id) =>
-{
-    var user = db.Users.Where(u => u.Id == id);
-    return user;
 });
 //DELETE a User by Id
 app.MapDelete("/user/{id}", (LoveLinkDbContext db, int id) =>
