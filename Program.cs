@@ -124,7 +124,7 @@ app.MapPost("/handlePartnerCode/{enteredCode}/{enteringUserId}", async (LoveLink
 //GET User by Id
 app.MapGet("/user/{id}", (LoveLinkDbContext db, int id) =>
 {
-    var user = db.Users.Where(u => u.Id == id);
+    var user = db.Users.FirstOrDefault(u => u.Id == id);
     return user;
 });
 //GET User from UID
