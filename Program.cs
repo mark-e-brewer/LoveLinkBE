@@ -122,20 +122,17 @@ app.MapPost("/handlePartnerCode/{enteredCode}/{enteringUserId}", async (LoveLink
     }
 });
 //GET User by Id
-app.MapGet("/user/{id}", (LoveLinkDbContext db, int id) =>
+app.MapGet("/user/{id}", async (LoveLinkDbContext db, int id) =>
 {
-    var user = db.Users.FirstOrDefault(u => u.Id == id);
+    var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
     return user;
 });
 //GET User from UID
-app.MapGet("/checkuser/{uid}", (LoveLinkDbContext db, string uid) =>
+app.MapGet("/checkuser/{uid}", async (LoveLinkDbContext db, string uid) =>
 {
-    var userExists = db.Users.Where(x => x.UID == uid).FirstOrDefault();
-    if (userExists == null)
-    {
-        return Results.StatusCode(204);
-    }
-    return Results.Ok(userExists);
+    var userExists = await db.Users.Where(x => x.UID == uid).FirstOrDefaultAsync();
+
+    return userExists;
 });
 //CREATE a User
 app.MapPost("/api/user", (LoveLinkDbContext db, User user) =>
@@ -150,7 +147,7 @@ app.MapGet("/useruidFromId/{id}", (LoveLinkDbContext db, int id) =>
     var userExists = db.Users.Where(x => x.Id == id).FirstOrDefault();
     if (userExists == null)
     {
-        return Results.StatusCode(204);
+        return Results.StatusCode(400);
     }
     return Results.Ok(userExists.UID);
 });
@@ -394,6 +391,12 @@ app.MapDelete("/removemymood/{userId}", async (LoveLinkDbContext db, int userId)
 });
 
 //MoodTag Endpoints
+
+//GET all MoodTags
+app.MapGet("/allMoodTags", (LoveLinkDbContext db) =>
+{
+    return db.MoodTags.ToList();
+});
 
 //POST SINGLE MoodTags to an existing Journal
 app.MapPost("/attachmoodtags/{journalId}/{moodTagId}", (LoveLinkDbContext db, int journalId, int moodTagId) =>
