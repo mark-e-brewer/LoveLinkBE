@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using LoveLink;
+using LoveLink.Utilities;
 using Microsoft.AspNetCore.Builder;
 using System.Runtime.CompilerServices;
 using System.Net;
@@ -26,7 +27,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(MyAllowSpecificOrigins,
         policy =>
-        {
+        { 
             policy.WithOrigins("https://localhost:7205",
                                 "http://localhost:3000",
                                 "https://localhost:5145")
@@ -72,6 +73,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
 //POST Partner Code
 app.MapPost("/generatePartnerCode/{userid}", async (LoveLinkDbContext db, HttpContext context, int userid) =>
 {
@@ -186,12 +189,11 @@ app.MapPut("/user/{id}", (LoveLinkDbContext db, int id, User updatedUser) =>
     existingUser.Age = updatedUser.Age;
     existingUser.Bio = updatedUser.Bio;
     existingUser.Gender = updatedUser.Gender;
-    existingUser.ProfilePhoto = updatedUser.ProfilePhoto;
+    existingUser.ProfilePhoto = FileUtility.SaveProfilePhoto(updatedUser.ProfilePhoto);
     existingUser.PartnerId = updatedUser.PartnerId;
     existingUser.PartnerUid = updatedUser.PartnerUid;
     existingUser.AnniversaryDate = updatedUser.AnniversaryDate;
     existingUser.PartnerCode = updatedUser.PartnerCode;
-
 
     db.SaveChanges();
 

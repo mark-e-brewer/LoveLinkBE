@@ -3,6 +3,7 @@ using System;
 using LoveLink;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoveLink.Migrations
 {
     [DbContext(typeof(LoveLinkDbContext))]
-    partial class LoveLinkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231217003435_UserPFPfix")]
+    partial class UserPFPfix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,7 +63,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateEntered = new DateTime(2023, 12, 16, 19, 4, 23, 696, DateTimeKind.Local).AddTicks(2021),
+                            DateEntered = new DateTime(2023, 12, 16, 18, 34, 35, 2, DateTimeKind.Local).AddTicks(8477),
                             Entry = "This is the first entry.",
                             Name = "Mark's first Journal Entry",
                             PartnerId = 2,
@@ -72,7 +74,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateEntered = new DateTime(2023, 12, 16, 19, 4, 23, 696, DateTimeKind.Local).AddTicks(2062),
+                            DateEntered = new DateTime(2023, 12, 16, 18, 34, 35, 2, DateTimeKind.Local).AddTicks(8531),
                             Entry = "This is Alex's entry.",
                             Name = "Alex's first Journal Entry",
                             PartnerId = 1,
@@ -179,7 +181,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateTimeSet = new DateTime(2023, 12, 16, 19, 4, 23, 696, DateTimeKind.Local).AddTicks(4662),
+                            DateTimeSet = new DateTime(2023, 12, 16, 18, 34, 35, 3, DateTimeKind.Local).AddTicks(2029),
                             Mood = "Happy",
                             Notes = "Feeling great today!",
                             PartnerId = 2,
@@ -190,7 +192,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateTimeSet = new DateTime(2023, 12, 16, 19, 4, 23, 696, DateTimeKind.Local).AddTicks(4669),
+                            DateTimeSet = new DateTime(2023, 12, 16, 18, 34, 35, 3, DateTimeKind.Local).AddTicks(2047),
                             Mood = "Calm",
                             Notes = "Taking it easy.",
                             PartnerId = 1,
@@ -244,7 +246,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateSet = new DateTime(2023, 12, 16, 19, 4, 23, 697, DateTimeKind.Local).AddTicks(2262),
+                            DateSet = new DateTime(2023, 12, 16, 18, 34, 35, 4, DateTimeKind.Local).AddTicks(2476),
                             LinkToSource = "https://example.com/message",
                             ReceivingUserId = 2,
                             SourceUserId = 1,
@@ -255,7 +257,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateSet = new DateTime(2023, 12, 16, 19, 4, 23, 697, DateTimeKind.Local).AddTicks(2281),
+                            DateSet = new DateTime(2023, 12, 16, 18, 34, 35, 4, DateTimeKind.Local).AddTicks(2497),
                             LinkToSource = "https://example.com/friend-request",
                             ReceivingUserId = 1,
                             ReceivingUserName = "Happy",
