@@ -27,8 +27,8 @@ namespace LoveLink
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasData(
-                new User { Id = 1, UID = "123abc456d", Name = "Mark", Age = 25, Bio = "Hi im Mark!", Gender = "He/Him", ProfilePhoto = "fakeLinkToFile", PartnerId = 2, PartnerUid = "efg789hij0", AnniversaryDate = new DateTime(2021, 3, 2), PartnerCode = null, MyMood = null, Journals = null, Notifications = null, PartnerUser = null },
-                new User { Id = 2, UID = "efg789hij0", Name = "Alex", Age = 24, Bio = "Hi im Alex!", Gender = "She/Her", ProfilePhoto = "fakeLinkToFile", PartnerId = 1, PartnerUid = "123abc456d", AnniversaryDate = new DateTime(2021, 3, 2), PartnerCode = null, MyMood = null, Journals = null, Notifications = null, PartnerUser = null }
+                new User { Id = 1, UID = "zb6FHsllN7Oajbgu62FuOcPgJKa2", Name = "Mark", Age = 25, Bio = "Hi im Mark!", Gender = "He/Him", ProfilePhoto = null, PartnerId = 2, PartnerUid = "Fe25HwCTneSDHV5QfyoLwSqPiJS2", AnniversaryDate = new DateTime(2021, 3, 2), PartnerCode = "123ABC", MyMood = null, Journals = null, Notifications = null, PartnerUser = null },
+                new User { Id = 2, UID = "Fe25HwCTneSDHV5QfyoLwSqPiJS2", Name = "Alex", Age = 24, Bio = "Hi im Alex!", Gender = "She/Her", ProfilePhoto = null, PartnerId = 1, PartnerUid = "zb6FHsllN7Oajbgu62FuOcPgJKa2", AnniversaryDate = new DateTime(2021, 3, 2), PartnerCode = "123ABC", MyMood = null, Journals = null, Notifications = null, PartnerUser = null }
             );
 
             modelBuilder.Entity<Journal>().HasData(
