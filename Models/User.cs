@@ -11,8 +11,7 @@ namespace LoveLink.Models
         public int? Age { get; set; }
         public string? Bio { get; set; }
         public string? Gender { get; set; }
-        [NotMapped]
-        public IFormFile ProfilePhoto { get; set; }
+        public string? ProfilePhoto { get; set; }
         public int? PartnerId { get; set; }
         public string? PartnerUid { get; set; }
         public DateTime? AnniversaryDate { get; set; }

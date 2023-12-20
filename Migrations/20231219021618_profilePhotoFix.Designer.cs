@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LoveLink.Migrations
 {
     [DbContext(typeof(LoveLinkDbContext))]
-    [Migration("20231217010423_AddProfilePhotoToUsers")]
-    partial class AddProfilePhotoToUsers
+    [Migration("20231219021618_profilePhotoFix")]
+    partial class profilePhotoFix
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -63,7 +63,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateEntered = new DateTime(2023, 12, 16, 19, 4, 23, 696, DateTimeKind.Local).AddTicks(2021),
+                            DateEntered = new DateTime(2023, 12, 18, 20, 16, 18, 369, DateTimeKind.Local).AddTicks(4518),
                             Entry = "This is the first entry.",
                             Name = "Mark's first Journal Entry",
                             PartnerId = 2,
@@ -74,7 +74,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateEntered = new DateTime(2023, 12, 16, 19, 4, 23, 696, DateTimeKind.Local).AddTicks(2062),
+                            DateEntered = new DateTime(2023, 12, 18, 20, 16, 18, 369, DateTimeKind.Local).AddTicks(4564),
                             Entry = "This is Alex's entry.",
                             Name = "Alex's first Journal Entry",
                             PartnerId = 1,
@@ -181,7 +181,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateTimeSet = new DateTime(2023, 12, 16, 19, 4, 23, 696, DateTimeKind.Local).AddTicks(4662),
+                            DateTimeSet = new DateTime(2023, 12, 18, 20, 16, 18, 369, DateTimeKind.Local).AddTicks(7547),
                             Mood = "Happy",
                             Notes = "Feeling great today!",
                             PartnerId = 2,
@@ -192,7 +192,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateTimeSet = new DateTime(2023, 12, 16, 19, 4, 23, 696, DateTimeKind.Local).AddTicks(4669),
+                            DateTimeSet = new DateTime(2023, 12, 18, 20, 16, 18, 369, DateTimeKind.Local).AddTicks(7558),
                             Mood = "Calm",
                             Notes = "Taking it easy.",
                             PartnerId = 1,
@@ -246,7 +246,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 1,
-                            DateSet = new DateTime(2023, 12, 16, 19, 4, 23, 697, DateTimeKind.Local).AddTicks(2262),
+                            DateSet = new DateTime(2023, 12, 18, 20, 16, 18, 370, DateTimeKind.Local).AddTicks(7584),
                             LinkToSource = "https://example.com/message",
                             ReceivingUserId = 2,
                             SourceUserId = 1,
@@ -257,7 +257,7 @@ namespace LoveLink.Migrations
                         new
                         {
                             Id = 2,
-                            DateSet = new DateTime(2023, 12, 16, 19, 4, 23, 697, DateTimeKind.Local).AddTicks(2281),
+                            DateSet = new DateTime(2023, 12, 18, 20, 16, 18, 370, DateTimeKind.Local).AddTicks(7615),
                             LinkToSource = "https://example.com/friend-request",
                             ReceivingUserId = 1,
                             ReceivingUserName = "Happy",
@@ -304,6 +304,9 @@ namespace LoveLink.Migrations
 
                     b.Property<int?>("PartnerUserId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ProfilePhoto")
+                        .HasColumnType("text");
 
                     b.Property<string>("UID")
                         .HasColumnType("text");

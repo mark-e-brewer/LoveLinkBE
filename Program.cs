@@ -189,13 +189,29 @@ app.MapPut("/user/{id}", (LoveLinkDbContext db, int id, User updatedUser) =>
     existingUser.Age = updatedUser.Age;
     existingUser.Bio = updatedUser.Bio;
     existingUser.Gender = updatedUser.Gender;
-    existingUser.ProfilePhoto = FileUtility.SaveProfilePhoto(updatedUser.ProfilePhoto);
     existingUser.PartnerId = updatedUser.PartnerId;
     existingUser.PartnerUid = updatedUser.PartnerUid;
     existingUser.AnniversaryDate = updatedUser.AnniversaryDate;
     existingUser.PartnerCode = updatedUser.PartnerCode;
 
     db.SaveChanges();
+
+    return Results.Ok(existingUser);
+});
+//UPDATE Profile Photo by userID
+app.MapPut("/user/{id}/profile-photo", async (LoveLinkDbContext db, int id,[FromForm] IFormFile ProfilePhoto) =>
+{
+    var existingUser = await db.Users.Where(u => u.Id == id)
+    .FirstOrDefaultAsync();
+
+    if (existingUser == null)
+    {
+        return Results.NotFound("User not found");
+    }
+
+    existingUser.ProfilePhoto = FileUtility.SaveProfilePhoto(ProfilePhoto);
+
+     await db.SaveChangesAsync();
 
     return Results.Ok(existingUser);
 });
@@ -515,6 +531,44 @@ app.MapPost("/attachmanymoodtags/{journalId}", (LoveLinkDbContext db, int journa
     db.SaveChanges();
 
     return Results.Ok("MoodTags attached to Journal successfully");
+});
+
+//NOTIFICATIONS ENDPOINTS BELLOW
+
+app.MapGet("/userNotifs/{id}", async (LoveLinkDbContext db, int id) =>
+{
+    var user = await db.Users
+        .Where(u => u.Id == id)
+        .Include(u => u.Notifications)
+        .FirstOrDefaultAsync();
+
+    if (user != null)
+    {
+        return Results.Ok(user.Notifications);
+    }
+    else
+    {
+        return Results.NotFound();
+    }
+});
+
+app.MapDelete("/deleteNotif/{notificationId}", async (LoveLinkDbContext db, int notificationId) =>
+{
+    var notification = await db.Notifications
+        .Where(n => n.Id == notificationId)
+        .FirstOrDefaultAsync();
+
+    if (notification != null)
+    {
+        db.Notifications.Remove(notification);
+        await db.SaveChangesAsync();
+
+        return Results.Ok();
+    }
+    else
+    {
+        return Results.NotFound();
+    }
 });
 
 
