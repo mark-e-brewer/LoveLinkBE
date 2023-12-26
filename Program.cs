@@ -348,18 +348,21 @@ app.MapGet("/myMoods", (LoveLinkDbContext db) =>
 //POST a MyMood to a User by Id
 app.MapPost("/user/{userId}/mymood/{moodId}", async (LoveLinkDbContext db, int userId, int moodId) =>
 {
+    Console.WriteLine($"Received request for userId: {userId}, moodId: {moodId}");
+
     var user = await db.Users.FindAsync(userId);
     var mood = await db.MyMoods.FindAsync(moodId);
 
     if (user == null || mood == null)
     {
+        Console.WriteLine("User or mood not found");
         return Results.NotFound("User or mood not found");
     }
     user.MyMood = mood;
-
     await db.SaveChangesAsync();
 
-    return Results.Ok();
+    Console.WriteLine("User's mood updated successfully");
+    return Results.Ok(new { });
 });
 //GET User with MyMood DTO
 app.MapGet("/userWithMyMood/{userId}", async (int userId, [FromServices] LoveLinkDbContext dbContext) =>
@@ -537,19 +540,11 @@ app.MapPost("/attachmanymoodtags/{journalId}", (LoveLinkDbContext db, int journa
 
 app.MapGet("/userNotifs/{id}", async (LoveLinkDbContext db, int id) =>
 {
-    var user = await db.Users
-        .Where(u => u.Id == id)
-        .Include(u => u.Notifications)
-        .FirstOrDefaultAsync();
+    var notifications = await db.Notifications
+        .Where(n => n.ReceivingUserId == id)
+        .ToListAsync();
 
-    if (user != null)
-    {
-        return Results.Ok(user.Notifications);
-    }
-    else
-    {
-        return Results.NotFound();
-    }
+    return notifications;
 });
 
 app.MapDelete("/deleteNotif/{notificationId}", async (LoveLinkDbContext db, int notificationId) =>
