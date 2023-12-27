@@ -337,6 +337,41 @@ app.MapDelete("/deletejournal/{journalId}", (LoveLinkDbContext db, int journalId
 
     return Results.Ok("Journal deleted successfully");
 });
+//GET Most Recent Journal
+app.MapGet("/recentJournal/{id}", async (LoveLinkDbContext db, int id) =>
+{
+    var user = await db.Users
+        .Include(u => u.Journals)
+        .FirstOrDefaultAsync(u => u.Id == id);
+
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+
+    var mostRecentJournal = user.Journals?
+        .OrderByDescending(j => j.DateEntered)
+        .Select(j => new
+        {
+            j.Id,
+            j.UserId,
+            j.PartnerId,
+            j.PartnerUid,
+            j.Name,
+            j.Entry,
+            j.DateEntered,
+            j.Visibility,
+            j.MoodTags
+        })
+        .FirstOrDefault();
+
+    if (mostRecentJournal == null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(mostRecentJournal);
+});
 
 //MyMood Endpoints
 
