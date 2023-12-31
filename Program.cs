@@ -577,6 +577,7 @@ app.MapGet("/userNotifs/{id}", async (LoveLinkDbContext db, int id) =>
 {
     var notifications = await db.Notifications
         .Where(n => n.ReceivingUserId == id)
+        .OrderByDescending(n => n.DateSet) //New to Old
         .ToListAsync();
 
     return notifications;
