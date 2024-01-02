@@ -602,5 +602,9 @@ app.MapDelete("/deleteNotif/{notificationId}", async (LoveLinkDbContext db, int 
     }
 });
 
+app.MapPut("/setNotifsViewed", async (LoveLinkDbContext db, Array notifObjs) => 
+{
+    return Results.Ok("filler");
+});
 
 app.Run();
