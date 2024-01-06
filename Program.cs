@@ -415,7 +415,7 @@ app.MapGet("/userWithMyMood/{userId}", async (int userId, [FromServices] LoveLin
                     MyMoodId = u.MyMood.Id,
                     MoodName = u.MyMood.Mood
                 }
-                : null // Set to null if MyMood is not present
+                : null
         })
         .FirstOrDefaultAsync();
 
@@ -438,12 +438,11 @@ app.MapDelete("/removemymood/{userId}", async (LoveLinkDbContext db, int userId)
             return Results.NotFound($"User with ID {userId} not found.");
         }
 
-        // Remove the mood from the user
-        user.MyMood = null; // This will remove the association
+        user.MyMood = null;
 
         await db.SaveChangesAsync();
 
-        return Results.NoContent(); // 204 No Content
+        return Results.NoContent();
 });
 
 //MoodTag Endpoints
@@ -572,7 +571,6 @@ app.MapPost("/attachmanymoodtags/{journalId}", (LoveLinkDbContext db, int journa
 });
 
 //NOTIFICATIONS ENDPOINTS BELLOW
-
 app.MapGet("/userNotifs/{id}", async (LoveLinkDbContext db, int id) =>
 {
     var notifications = await db.Notifications
@@ -602,9 +600,87 @@ app.MapDelete("/deleteNotif/{notificationId}", async (LoveLinkDbContext db, int 
     }
 });
 
-app.MapPut("/setNotifsViewed", async (LoveLinkDbContext db, Array notifObjs) => 
+app.MapPut("/setNotifsViewed", async (LoveLinkDbContext db, HttpRequest request) =>
 {
-    return Results.Ok("filler");
+    try
+    {
+        using (var streamReader = new StreamReader(request.Body))
+        {
+            var json = await streamReader.ReadToEndAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter() }
+            };
+
+            var notificationListDto = JsonSerializer.Deserialize<NotificationListDTO>(json, options);
+
+            if (notificationListDto != null && notificationListDto.Notifications != null && notificationListDto.Notifications.Count > 0)
+            {
+                foreach (var notifDto in notificationListDto.Notifications)
+                {
+                    var notifObj = new Notification
+                    {
+                        Id = notifDto.Id,
+                        SourceUserId = notifDto.SourceUserId,
+                        SourceUserName = notifDto.SourceUserName,
+                        ReceivingUserId = notifDto.ReceivingUserId,
+                        ReceivingUserName = notifDto.ReceivingUserName,
+                        Title = notifDto.Title,
+                        DateSet = notifDto.DateSet,
+                        Viewed = true,
+                        LinkToSource = notifDto.LinkToSource,
+                    };
+
+                    db.Notifications.Update(notifObj);
+                }
+
+                await db.SaveChangesAsync();
+
+                return Results.Ok("Notifications marked as viewed.");
+            }
+            else
+            {
+                return Results.BadRequest("Invalid request body.");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest($"Error updating notifications: {ex.Message}");
+    }
 });
+
+app.MapGet("/unviewedNotifs/{id}", (LoveLinkDbContext db, int id) =>
+{
+    try
+    {
+        var unviewedNotifications = db.Notifications
+            .Where(notification => notification.ReceivingUserId == id && (notification.Viewed == null || notification.Viewed == false))
+            .ToList();
+
+        var unviewedNotificationDtos = unviewedNotifications
+            .Select(notification => new NotificationDTO
+            {
+                Id = notification.Id,
+                SourceUserId = notification.SourceUserId,
+                SourceUserName = notification.SourceUserName,
+                ReceivingUserId = notification.ReceivingUserId,
+                ReceivingUserName = notification.ReceivingUserName,
+                Title = notification.Title,
+                DateSet = notification.DateSet,
+                Viewed = notification.Viewed,
+                LinkToSource = notification.LinkToSource
+            })
+            .ToList();
+
+        return Results.Ok(unviewedNotificationDtos);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest($"Error retrieving unviewed notifications: {ex.Message}");
+    }
+});
+
 
 app.Run();
