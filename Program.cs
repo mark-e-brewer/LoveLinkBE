@@ -375,6 +375,13 @@ app.MapGet("/recentJournal/{id}", async (LoveLinkDbContext db, int id) =>
 
 //MyMood Endpoints
 
+app.MapPost("/createMyMood", async (LoveLinkDbContext db, MyMood myMood) => 
+{
+    db.MyMoods.Add(myMood); ;
+    await db.SaveChangesAsync();
+    return Results.Created($"/myMood/{myMood.Id}", myMood);
+});
+
 //GET all MyMoods
 app.MapGet("/myMoods", (LoveLinkDbContext db) => 
 {
@@ -568,6 +575,13 @@ app.MapPost("/attachmanymoodtags/{journalId}", (LoveLinkDbContext db, int journa
     db.SaveChanges();
 
     return Results.Ok("MoodTags attached to Journal successfully");
+});
+
+app.MapPost("/createMoodTag", async (LoveLinkDbContext db, MoodTag moodTag) => 
+{
+    db.MoodTags.Add(moodTag); ;
+    await db.SaveChangesAsync();
+    return Results.Created($"/moodTag/{moodTag.Id}", moodTag);
 });
 
 //NOTIFICATIONS ENDPOINTS BELLOW
