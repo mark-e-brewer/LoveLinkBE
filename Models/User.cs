@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+//User
 
 namespace LoveLink.Models
 {
