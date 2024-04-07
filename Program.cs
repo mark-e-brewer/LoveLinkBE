@@ -613,7 +613,7 @@ app.MapDelete("/deleteNotif/{notificationId}", async (LoveLinkDbContext db, int 
         return Results.NotFound();
     }
 });
-//Set Unviewed Notifications to Viewed
+//Set Unviewed Notifications to Viewed.
 app.MapPut("/setNotifsViewed", async (LoveLinkDbContext db, HttpRequest request) =>
 {
     try
@@ -664,7 +664,7 @@ app.MapPut("/setNotifsViewed", async (LoveLinkDbContext db, HttpRequest request)
         return Results.BadRequest($"Error updating notifications: {ex.Message}");
     }
 });
-//GET unviewed notifications
+//GET unviewed notifications.
 app.MapGet("/unviewedNotifs/{id}", (LoveLinkDbContext db, int id) =>
 {
     try
