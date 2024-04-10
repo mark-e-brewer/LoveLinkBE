@@ -12,6 +12,7 @@ namespace LoveLink
         public DbSet<MoodTag> MoodTags { get; set; }
         public DbSet<Journal> Journals { get; set; }
         public DbSet<JournalMoodTag> JournalMoodTags { get; set; }
+        public DbSet<Gift> Gifts { get; set; }
 
         public LoveLinkDbContext(DbContextOptions<LoveLinkDbContext> context) : base(context) { }
 
@@ -30,6 +31,8 @@ namespace LoveLink
                 new User { Id = 1, UID = "zb6FHsllN7Oajbgu62FuOcPgJKa2", Name = "Mark", Age = 25, Bio = "Hi im Mark!", Gender = "He/Him", ProfilePhoto = null, PartnerId = 2, PartnerUid = "Fe25HwCTneSDHV5QfyoLwSqPiJS2", AnniversaryDate = new DateTime(2021, 3, 2), PartnerCode = "123ABC", MyMood = null, Journals = null, Notifications = null, PartnerUser = null },
                 new User { Id = 2, UID = "Fe25HwCTneSDHV5QfyoLwSqPiJS2", Name = "Alex", Age = 24, Bio = "Hi im Alex!", Gender = "She/Her", ProfilePhoto = null, PartnerId = 1, PartnerUid = "zb6FHsllN7Oajbgu62FuOcPgJKa2", AnniversaryDate = new DateTime(2021, 3, 2), PartnerCode = "123ABC", MyMood = null, Journals = null, Notifications = null, PartnerUser = null }
             );
+
+
 
             modelBuilder.Entity<Journal>().HasData(
                 new Journal
@@ -113,7 +116,34 @@ namespace LoveLink
                 }
             );
 
-
+            modelBuilder.Entity<Gift>().HasData(
+        new Gift
+        {
+            Id = 1,
+            SourceUserId = 1,
+            Title = "Poke",
+            Description = "Your partner poked you, and are thinkning about you.",
+            Emoji = "🎁",
+            DateSet = DateTime.Now,
+            Viewed = false,
+            LinkToSource = "https://example.com/gift",
+            ReceivingUser = null,
+            SourceUser = null
+        },
+        new Gift
+        {
+            Id = 2,
+            SourceUserId = 2,
+            Title = "Hug",
+            Description = "Your Partner send you a warm hug!",
+            Emoji = "💝",
+            DateSet = DateTime.Now,
+            Viewed = false,
+            LinkToSource = "https://example.com/surprise",
+            ReceivingUser = null,
+            SourceUser = null
+        }
+    );
             base.OnModelCreating(modelBuilder);
         }
 
